@@ -1,0 +1,62 @@
+#主要配置集中于此，可自行修改；所有指令及用法参见__init__.py和Documentation.py
+
+[paths] # 聊天数据存储位置
+base_dir = "."
+config_dir = "data"
+groups_dir = "data/groups"
+whitelist_dir = "data/whitelist"
+public_dir = "data/groups/public" # 公共文件
+private_dir = "data/groups/private" # 私聊数据
+
+[files] # 基础文件路径
+base_file = "data/groups/public/base.json"
+group_whitelist_file = "data/whitelist/group_whitelist.json"
+user_whitelist_file = "data/whitelist/user_whitelist.json"
+
+[api] # 默认硅基流动API及deepseek的模型
+url = "https://api.siliconflow.cn/v1/chat/completions"
+#模型，可自行增改
+models = [
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+    "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+    "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    "deepseek-ai/DeepSeek-V3",
+    "deepseek-ai/DeepSeek-R1",
+    "Pro/deepseek-ai/DeepSeek-V3",
+    "Pro/deepseek-ai/DeepSeek-R1"
+]
+pre_mod = [7, 8] #特殊模型索引，特殊模型具有一个不因切换模型而归零的使用冷却时间，只用超级用户不受限制
+
+# 填入自己的API_KEY
+[api.headers] 
+Authorization = "Bearer sk-xxxxxx-YOUR-API-KEY-xxxxxxxx"
+Content-Type = "application/json"
+
+#api高级功能参照硅基流动官网，并修改ChatHandler.py -> (class)ChatHandler -> (func)_call_api 实现
+
+# 对话事件基本配置
+[basic_config] 
+tkc = false #是否显示思考内容
+cooldown = 300.0 #特殊模型冷却时间，单位秒
+prt = true #是否在对话和撤回时打印记录到日志
+mod = 3 #初始模型，对应models列表索引代表的模型
+default_personality = "你是名叫华尔的猫娘。" #默认人格
+max_token = 1024 #max_token，亦代表通过QQ命令设置人格的最大描述长度
+max_recall = 2 #最多撤回发言量，含义与rd一致，最多不超过rd（需为偶数）
+rd = 6 #记忆体容量，表示用户和助手发言量之和，除二即为记忆轮数（需为偶数）
+memory = [] #初始记忆内容（默认空），可看做机器人语气模板和记忆拓展，格式如下：
+##list[dict[str, str]]
+#{
+#   "role": "user",（或assistant）
+#   "content": "..." 
+#}
+
+# 白名单配置
+[whitelist_config]
+whitelist_mode = 0
+#白名单模式，白名单包括用户白名单和群聊白名单；
+#当值为0时，仅用户白名单上用户可进行私聊，群聊白名单中的群任何成员都可进行群聊；
+#当值为1时，仅用户白名单上用户可进行私聊，而群聊则需此用户既在用户白名单中，所属群又在群聊白名单上
+#其余值未定义，将会报错并使得除超级用户外任何命令无法执行，若需自定义模式，修改GroupManager.py -> (class)WhitelistManager -> (func)_check_access 实现
