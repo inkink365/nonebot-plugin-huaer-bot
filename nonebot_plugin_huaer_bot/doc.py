@@ -56,7 +56,7 @@ class Documentation:
         {current_model}
 
         当前人格:
-        {self.chat_config}
+        {self.chat_config.current_personality}
 
         记忆能力:
         {memory_rounds}轮对话

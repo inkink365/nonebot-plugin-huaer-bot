@@ -2,7 +2,7 @@
 
 [paths] # 聊天数据存储位置
 base_dir = "."
-config_dir = "data"
+data_dir = "data"
 groups_dir = "data/groups"
 whitelist_dir = "data/whitelist"
 public_dir = "data/groups/public" # 公共文件

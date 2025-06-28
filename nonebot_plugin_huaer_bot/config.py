@@ -1,9 +1,10 @@
 import json
 import toml
+import shutil
 import datetime
 from pathlib import Path
 from typing import Dict, Any
-from nonebot import logger
+from nonebot import logger, get_driver
 
 class ConfigManager:
     '''配置管理类'''
@@ -51,6 +52,45 @@ class ConfigManager:
 
 BASE_DIR = Path(__file__).resolve().parent
 
+# 处理配置文件路径
+CONFIG_DIR = BASE_DIR / "config.toml"
+try:
+    # 读取配置文件路径
+    TEMP_DIR = Path(get_driver().config.huaer_config_path)
+
+    if TEMP_DIR is not None:
+        try:
+            # 检查是否存在
+            if not TEMP_DIR.exists():
+                raise ValueError(f"路径 '{TEMP_DIR}' 不存在")
+            
+            # 检查是否为文件夹
+            if not TEMP_DIR.is_dir():
+                raise ValueError(f"路径 '{TEMP_DIR}' 不是文件夹")
+            
+            # 检查是否为绝对路径
+            if not TEMP_DIR.is_absolute():
+                raise ValueError(f"路径 '{TEMP_DIR}' 不是绝对路径")
+
+            # 目标配置文件路径
+            target_config = TEMP_DIR / "huaer_config.toml"
+            default_config = BASE_DIR / "config.toml"
+
+            # 如果配置文件不存在，复制默认配置
+            if not target_config.exists():
+                if not default_config.exists():
+                    raise FileNotFoundError(f"默认配置文件 '{default_config}' 不存在")
+                
+                shutil.copy2(default_config, target_config)
+                logger.info(f"已复制默认配置到: {target_config}")
+            
+            CONFIG_DIR = target_config
+
+        except Exception as e:
+            logger.error(f"配置文件异常: {e}")
+except:
+    pass
+
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
@@ -58,26 +98,26 @@ PATCH_VERSION = 1
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
-cfg = ConfigManager.load_toml(BASE_DIR / "config.toml")
+cfg = ConfigManager.load_toml(CONFIG_DIR)
 
 # 加载数据文件夹路径
 paths_config = cfg["paths"]
         
-config_dir = BASE_DIR / paths_config["config_dir"]
+data_dir = BASE_DIR / paths_config["data_dir"]
 groups_dir = BASE_DIR / paths_config["groups_dir"]
 public_dir = BASE_DIR / paths_config["public_dir"]
 private_dir = BASE_DIR / paths_config["private_dir"]
 whitelist_dir = BASE_DIR / paths_config["whitelist_dir"]
         
 # 创建目录，确保所有必要的目录存在
-config_dir.mkdir(exist_ok=True, parents=True)
+data_dir.mkdir(exist_ok=True, parents=True)
 groups_dir.mkdir(exist_ok=True, parents=True)
 public_dir.mkdir(exist_ok=True, parents=True)
 private_dir.mkdir(exist_ok=True, parents=True)
 whitelist_dir.mkdir(exist_ok=True, parents=True)
 
 # 解析数据文件夹路径
-CONFIG_DIR = config_dir
+DATA_DIR = data_dir
 GROUPS_DIR = groups_dir
 PUBLIC_DIR = public_dir
 PRIVATE_DIR = private_dir
