@@ -14,10 +14,10 @@ from nonebot.plugin import PluginMetadata
 
 __plugin_meta__ = PluginMetadata(
     name="HuaEr聊天bot",
-    description="基于siliconflow API的Nonebot2聊天插件",
-    usage="管理员可通过一系列操作设定对话规则，用户通过“/对话”等命令以使用",
+    description="基于SiliconFlow API的Nonebot2聊天插件",
+    usage="管理员可通过一系列操作设定对话规则，用户通过“/对话”等命令以使用，支持markdown显示",
     type="application",
-    ###homepage="https://github.com/zhiyu1998/nonebot-plugin-auto-sendlike",###
+    homepage="https://github.com/inkink365/nonebot-plugin-huaer-bot",
     supported_adapters={ "~onebot.v11" }
 )
 
@@ -333,8 +333,8 @@ async def init():
 #                  © 2025 Huaer DevGroup. 
 # ---------------------------------------------------
 # 开源协议 / License: MIT
-# 代码仓库 / Repository: github.com/huaer-dev/core
-# 技术文档 / Documentation: docs.huaer.dev
+# 代码仓库 / Repository: github.com/inkink365/nonebot-plugin-huaer-bot
+# 技术文档 / Documentation: github.com/inkink365/nonebot-plugin-huaer-bot/wiki
 # ---------------------------------------------------
 # 联系方式 / Contact:
 #   - 电子邮件 / Email: HuaEr_DevGroup@outlook.com
