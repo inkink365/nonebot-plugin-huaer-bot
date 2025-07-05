@@ -5,11 +5,14 @@ from json import JSONDecodeError
 from typing import List, Optional
 
 from nonebot import logger
+from nonebot import require
 from nonebot.adapters import Message, Event
-from nonebot_plugin_htmlrender import md_to_pic
 from nonebot.adapters.onebot.v11 import MessageSegment
 from .config import ConfigManager, ChatConfig, API_URL, HEADERS, PRE_MOD, PUBLIC_DIR, MODELS
 
+require("nonebot_plugin_htmlrender")
+
+from nonebot_plugin_htmlrender import md_to_pic
 
 class ChatHandler:
     '''对话响应类'''
