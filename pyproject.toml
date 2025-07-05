@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "nonebot-plugin-huaer-bot"
-version = "2.1.1"
+version = "2.1.2"
 description = "基于NoneBot的智能对话插件，支持多群组管理和人格定制"
 authors = ["HuaEr DevGroup <HuaEr_DevGroup@outlook.com>"]
 readme = "README.md"
 packages = [{include = "nonebot_plugin_huaer_bot"}]
-repository = "https://github.com/huaer-dev/nonebot-plugin-huaer-bot"
+repository = "https://github.com/inkink365/nonebot-plugin-huaer-bot"
 license = "MIT"
 
 [tool.poetry.dependencies]

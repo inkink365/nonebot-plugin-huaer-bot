@@ -283,7 +283,7 @@ class initialize:
         response = await self._get_group(self._get_info(event)).show_user_doc()
         await user_doc_cmd.finish(response)
 
-    # 总控命令
+    # 管理员命令
     async def choose_group(self, args: Message = CommandArg()):
         """控制群聊"""
         arg_text = args.extract_plain_text().strip()
@@ -302,8 +302,11 @@ class initialize:
 
     async def exit_group(self):
         """解控群聊"""
-        self.ID_symbol = None
-        await close_group.finish(f"✅ 解控成功")
+        if self.ID_symbol is not None :
+            self.ID_symbol = None
+            await close_group.finish(f"✅ 解控成功")
+        else :
+            await close_group.finish(f"⚠️ 当前没有选中的组群")
 
 '''except FinishedException:
     pass  # 忽略NoneBot的流程控制异常(如果调试中有异常，需要的话)'''
@@ -325,8 +328,8 @@ async def init():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.1.1 (Stable)
-# 最新修改日期 / Last Modified: 2025年5月10日 / May 4, 2025
+# 版本号 / Version: 2.1.2 (Stable)
+# 最新修改日期 / Last Modified: 2025年7月5日 / July 5, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------
 # 版权声明 / Copyright: © 2025 华尔开发组 

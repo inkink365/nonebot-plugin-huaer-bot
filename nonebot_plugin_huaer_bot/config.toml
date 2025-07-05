@@ -1,4 +1,4 @@
-#主要配置集中于此，可自行修改；所有指令及用法参见__init__.py和Documentation.py
+#主要配置集中于此，可自行修改；所有指令及用法参见__init__.py和doc.py
 
 [paths] # 聊天数据存储位置
 base_dir = "."
