@@ -1,6 +1,7 @@
 # coding: utf-8
 # Copyright (c) 2025 HuaEr DevGroup. Licensed under MIT.
 import re
+from nonebot import require
 from nonebot import get_driver
 from .config import Information
 from nonebot.params import CommandArg
@@ -20,6 +21,8 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://github.com/inkink365/nonebot-plugin-huaer-bot",
     supported_adapters={ "~onebot.v11" }
 )
+
+require("nonebot_plugin_htmlrender")
 
 # 注册事件响应器
 # 对话事件响应器
@@ -328,7 +331,7 @@ async def init():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.1.3 (Stable)
+# 版本号 / Version: 2.1.4 (Stable)
 # 最新修改日期 / Last Modified: 2025年7月5日 / July 5, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------
