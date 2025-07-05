@@ -94,7 +94,7 @@ except:
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
-PATCH_VERSION = 4
+PATCH_VERSION = 5
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
