@@ -4,7 +4,11 @@ import shutil
 import datetime
 from pathlib import Path
 from typing import Dict, Any
-from nonebot import logger, get_driver
+from nonebot import logger, get_driver, require
+
+require("nonebot_plugin_localstore")
+
+from nonebot_plugin_localstore import get_data_dir
 
 class ConfigManager:
     '''配置管理类'''
@@ -15,10 +19,10 @@ class ConfigManager:
             if file_path.exists():
                 with open(file_path, "r", encoding="utf-8") as f:
                     return toml.load(f)
-            logger.error(f"TOML 配置文件不存在: {file_path}")
+            logger.error(f"TOML 不存在: {file_path}")
             return {}
         except Exception as e:
-            logger.error(f"加载 TOML 配置失败: {e}")
+            logger.error(f"加载 {file_path} 失败: {e}")
             return {}
     
     @staticmethod
@@ -27,7 +31,7 @@ class ConfigManager:
             with open(file_path, "w", encoding="utf-8") as f:
                 toml.dump(data, f)
         except Exception as e:
-            logger.error(f"保存 TOML 配置失败: {e}")
+            logger.error(f"保存 {file_path} 失败: {e}")
 
     @staticmethod
     def load_json(file_path: Path, default: dict) -> dict:
@@ -50,10 +54,10 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"保存 {file_path} 失败: {e}")
 
-BASE_DIR = Path(__file__).resolve().parent
+SELF_DIR = Path(__file__).resolve().parent
 
 # 处理配置文件路径
-CONFIG_DIR = BASE_DIR / "config.toml"
+CONFIG_DIR = SELF_DIR / "config.toml"
 try:
     # 读取配置文件路径
     TEMP_DIR = Path(get_driver().config.huaer_config_path)
@@ -74,7 +78,7 @@ try:
 
             # 目标配置文件路径
             target_config = TEMP_DIR / "huaer_config.toml"
-            default_config = BASE_DIR / "config.toml"
+            default_config = SELF_DIR / "config.toml"
 
             # 如果配置文件不存在，复制默认配置
             if not target_config.exists():
@@ -89,12 +93,16 @@ try:
         except Exception as e:
             logger.error(f"配置文件异常: {e}")
 except:
+    logger.info(f"未设置配置文件路径, 使用默认配置")
     pass
+
+# 数据存储目录
+BASE_DIR = get_data_dir("nonebot_plugin_huaer_bot")
 
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
-PATCH_VERSION = 6
+PATCH_VERSION = 7
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件

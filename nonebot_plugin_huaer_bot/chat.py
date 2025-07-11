@@ -1,6 +1,6 @@
 import re
 import time
-import requests
+import httpx
 from json import JSONDecodeError
 from typing import List, Optional
 
@@ -68,14 +68,19 @@ class ChatHandler:
         }
         
         try:
-            response = requests.post(
-                API_URL,
-                json=payload,
-                headers=HEADERS,
-                timeout=60
-            )
-            response.raise_for_status()
-            return response.json()
+            # 创建异步客户端实例
+            async with httpx.AsyncClient() as client:
+                # 发送异步POST请求
+                response = await client.post(
+                    API_URL,
+                    json=payload,
+                    headers=HEADERS,
+                    timeout=60
+                )
+                # 检查HTTP状态码
+                response.raise_for_status()
+                # 返回JSON响应
+                return response.json()
         except Exception as e:
             logger.error(f"API请求失败: {e}")
             return None
