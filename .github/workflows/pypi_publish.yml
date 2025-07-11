@@ -16,10 +16,10 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: "3.9"
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - name: Install Poetry via pip
+      run: python -m pip install poetry
+    - name: Configure Poetry environment
+      run: poetry config virtualenvs.create false
     - name: Install dependencies
       run: poetry install
     - name: Build the project
