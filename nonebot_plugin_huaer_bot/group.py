@@ -26,7 +26,7 @@ class WhitelistManager:
                 raise ValueError(f"群聊 {group_id} 已在白名单中")
             self.groups.append(group_id)
         else:
-            if group_id in self.groups:
+            if group_id not in self.groups:
                 raise ValueError(f"群聊 {group_id} 不在白名单中")
             self.groups.remove(group_id)
         
