@@ -53,7 +53,7 @@ class WhitelistManager:
 
     def _validate_group_id(self, group_id: str) -> bool:
         """验证群号格式"""
-        return re.fullmatch(r"\d{10}", group_id) is not None
+        return re.fullmatch(r"\d{6,10}", group_id) is not None
 
     def _validate_user_id(self, user_id: str) -> bool:
         """验证用户ID格式（兼容5-11位QQ号）"""

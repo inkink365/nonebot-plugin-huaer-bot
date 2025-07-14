@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-huaer-bot"
-version = "2.1.7"
+version = "2.1.8"
 description = "基于NoneBot的智能对话插件，支持多群组管理和人格定制"
 authors = ["HuaEr DevGroup <HuaEr_DevGroup@outlook.com>"]
 readme = "README.md"
