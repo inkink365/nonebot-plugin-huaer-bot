@@ -56,14 +56,14 @@ class ChatHandler:
             "id": str(getattr(event, "user_id", ""))
         }
 
-    async def _call_api(self, messages: List[dict]) -> Optional[dict]:
+    async def _call_api(self) -> Optional[dict]:
         """执行API请求"""
         payload = {
             "model": MODELS[self.cc.mod],
             "messages": [{
                 "role": "system",
                 "content": self.cc.current_personality
-            }] + messages,
+            }] + self.cc.mess,
             "max_tokens": self.cc.max_token,
         }
         
@@ -184,7 +184,7 @@ class ChatHandler:
         })
         
         # 执行API请求
-        response = await self._call_api(self.cc.mess)
+        response = await self._call_api()
         if not response:
             self.cc.mess.pop()
             return "⚠️ 服务暂不可用"
