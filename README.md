@@ -15,7 +15,7 @@ _✨基于硅基/DeepSeek API的智能对话插件✨_
 <img src="https://img.shields.io/badge/NoneBot-2.0+-red.svg" alt="nonebot">
 </a>
 <a href="https://python.org/">
-<img src="https://img.shields.io/badge/python-3.8+-orange.svg" alt="python">
+<img src="https://img.shields.io/badge/python-3.9+-orange.svg" alt="python">
 </a>
 <a href="https://mit-license.org/">
 <img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="license">

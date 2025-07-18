@@ -34,7 +34,7 @@ class ConfigManager:
             logger.error(f"保存 {file_path} 失败: {e}")
 
     @staticmethod
-    def load_json(file_path: Path, default: dict) -> dict:
+    def load_json(file_path: Path, default: Dict) -> Dict:
         try:
             if file_path.exists():
                 with open(file_path, "r", encoding="utf-8") as f:
@@ -47,7 +47,7 @@ class ConfigManager:
             return default
 
     @staticmethod
-    def save_json(data: dict, file_path: Path):
+    def save_json(data: Dict[str, Any], file_path: Path):
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
@@ -102,7 +102,7 @@ BASE_DIR = get_data_dir("nonebot_plugin_huaer_bot")
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
-PATCH_VERSION = 10
+PATCH_VERSION = 11
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
