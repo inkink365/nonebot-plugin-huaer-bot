@@ -1,11 +1,11 @@
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from nonebot import logger
 from .doc import Documentation
 from nonebot.adapters import Message
 from .chat import ChatHandler, PersonalityManager
-from .config import ConfigManager, ChatConfig, GROUP_WHITELIST_FILE, USER_WHITELIST_FILE, WHITELIST_MODE
+from .config import ConfigManager, ChatConfig, Tools, GROUP_WHITELIST_FILE, USER_WHITELIST_FILE, WHITELIST_MODE
 
 class WhitelistManager:
     '''白名单管理类'''
@@ -59,19 +59,6 @@ class WhitelistManager:
         """验证用户ID格式（兼容5-11位QQ号）"""
         return re.fullmatch(r"\d{5,11}", user_id) is not None
     
-    def _parse_args(self, args: Message) -> Optional[tuple]:
-        '''白名单参数解析器'''
-        arg = args.extract_plain_text().split()
-
-        if len(arg) != 2:
-            return None
-            
-        # 智能识别参数位置
-        action = next((a for a in arg if a in ("增加", "删除")), None)
-        id = next((g for g in arg if g != action), None)
-        
-        return (id, action) if id and action else None
-    
     def _check_access(self, user: str, group: str, type: bool) -> bool:
         '''鉴权函数，type为true表示群消息事件，false表示私聊事件'''
         # 群聊检查
@@ -97,7 +84,7 @@ class WhitelistManager:
     async def handle_group_whitelist(self, args: Message) -> str:
         '''群聊白名单控制命令'''
         try:
-            parsed = self._parse_args(args)
+            parsed = Tools._parse_args(args.extract_plain_text().split(), "增加", "删除")
             if not parsed:
                 return "⚠️ 格式错误，正确格式：/群聊白名单 [群号] [增加/删除]"
 
@@ -121,7 +108,7 @@ class WhitelistManager:
     async def handle_user_whitelist(self, args: Message) -> str:
         '''用户白名单控制命令'''
         try:
-            parsed = self._parse_args(args)
+            parsed = Tools._parse_args(args.extract_plain_text().split(), "增加", "删除")
             if not parsed:
                 return "⚠️ 格式错误，正确格式：/用户白名单 [QQ号] [增加/删除]"
 
@@ -208,16 +195,6 @@ class GroupManager:
             
             logger.info(f"群组管理器初始化完成，共加载 {len(self.groups)} 个实例")
             self._initialized = True
-
-    def _parse_args(self, args: List[str]) -> Optional[tuple]:
-        '''组管理器参数解析器'''
-        if len(args) != 2:
-            return None
-            
-        action = next((a for a in args if a in ("增加", "删除")), None)
-        id = next((g for g in args if g), None)
-        
-        return (id, action) if id and action else None
 
     def add_public_group(self):
         """初始化公共实例"""

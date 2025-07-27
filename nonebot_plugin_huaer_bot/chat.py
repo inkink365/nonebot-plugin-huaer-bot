@@ -2,13 +2,13 @@ import re
 import time
 import httpx
 from json import JSONDecodeError
-from typing import List, Optional
+from typing import Optional
 
 from nonebot import logger
 from nonebot import require
 from nonebot.adapters import Message, Event
 from nonebot.adapters.onebot.v11 import MessageSegment
-from .config import ConfigManager, ChatConfig, API_URL, HEADERS, PRE_MOD, PUBLIC_DIR, MODELS
+from .config import ConfigManager, ChatConfig, Tools, API_URL, HEADERS, PRE_MOD, PUBLIC_DIR, MODELS
 
 require("nonebot_plugin_htmlrender")
 
@@ -137,18 +137,6 @@ class ChatHandler:
             logger.error(f"Markdown转换失败: {e}")
             return MessageSegment.text("❌ 渲染失败,可能是因为没有对话记录。")
 
-    async def handle_recall(self, superuser: bool) -> str:
-        """处理撤回请求"""
-        if len(self.cc.mess) > 0 and (superuser or self.recall_times < self.cc.max_recall/2):
-            self.cc.mess = self.cc.mess[:-2]
-            self.recall_times += 1
-            if self.cc.prt : self._chat_info()#debug
-            return "✅ 已撤回上轮对话"
-        elif len(self.cc.mess) >= 2:
-            return "⚠️ 撤回数量达上限"
-        else:
-            return "⚠️ 无对话记录"
-
     async def handle_model_setting(self, key: Message) -> str:
         """处理模型设置"""
         if req := key.extract_plain_text():
@@ -202,7 +190,48 @@ class ChatHandler:
             self.cooldown_until = time.time() + self.cc.cooldown
         
         return result["response_message"]
+    
+    async def handle_recall_memory(self, superuser: bool) -> str:
+        """记忆撤回命令"""
+        if len(self.cc.mess) > 0 and (superuser or self.recall_times < self.cc.max_recall/2):
+            self.cc.mess = self.cc.mess[:-2]
+            self.recall_times += 1
+            if self.cc.prt : self._chat_info()#debug
+            return "✅ 已撤回上轮对话"
+        elif len(self.cc.mess) >= 2:
+            return "⚠️ 撤回数量达上限"
+        else:
+            return "⚠️ 无对话记录"
+        
+    async def handle_clean_memory(self) -> None:
+        "记忆清除命令"
+        if not self.cc.mess:
+            return "⚠️ 记忆体为空"
+        else:
+            self.cc.mess.clear()
+            return "✅ 清除成功"
+        
+    async def handle_add_memory(self, args: Message) -> str:
+        '''记忆添加命令'''
+        if(len(self.cc.mess) >= self.cc.rd):
+            return "⚠️ 记忆体已满，请先清理"
+        try:
+            parsed = Tools._parse_args(args.extract_plain_text().split(), "用户", "助手")
+            if not parsed:
+                return "⚠️ 格式错误，正确格式：/记忆添加 [用户/助手] [记忆内容]"
 
+            text, role = parsed
+
+            self.cc.mess.append({
+                "role": "user" if role == "用户" else "assistant",
+                "content": f"{text}" # 在多人语境中最好添加用户名，如：用户[xxx]: .....
+            })
+
+            self._chat_info()
+            return "✅ 添加成功"
+        except Exception as e:
+            logger.exception(f"未知错误:{e}")
+            return "⚠️ 系统异常，请联系管理员"
 
 class PersonalityManager:
     '''人格管理类，保存人格会附带当前记忆'''
@@ -248,19 +277,6 @@ class PersonalityManager:
         self.cc.current_personality = data.get("personality", "")
         self.cc.mess = data.get("memory", [])
 
-    def _parse_args(self, args: Message) -> Optional[tuple]:
-        '''人格参数解析器'''
-        arg = args.extract_plain_text().split()
-
-        if len(arg) != 2:
-            return None
-            
-        # 智能识别参数位置
-        place = next((a for a in arg if a in ("公共", "私有")), None)
-        id = next((g for g in arg if g != place), None)
-        
-        return (id, place) if id and place else None
-
     # 人格命令
     async def handle_set_personality(self, args: Message) -> str:
         '''人格设置命令'''
@@ -280,7 +296,7 @@ class PersonalityManager:
     async def handle_save_persona(self, args: Message) -> str:
         '''人格储存命令'''
         try:
-            parsed = self._parse_args(args)
+            parsed = Tools._parse_args(args.extract_plain_text().split(), "公共", "私有")
             if not parsed:
                 return "⚠️ 格式错误，正确格式：/人格储存 [人格名称] [公共/私有]"
             
@@ -310,7 +326,7 @@ class PersonalityManager:
     async def handle_load_persona(self, args: Message) -> str:
         '''人格读取命令'''
         try:
-            parsed = self._parse_args(args)
+            parsed = Tools._parse_args(args.extract_plain_text().split(), "公共", "私有")
             if not parsed:
                 return "⚠️ 格式错误，正确格式：/人格读取 [人格名称] [公共/私有]"
 
@@ -354,12 +370,4 @@ class PersonalityManager:
             "使用人格读取命令以切换人格。"
         )
         
-        return msg
-        
-    async def handle_clean_memory(self) -> None:
-        "记忆清除命令"
-        if not self.cc.mess:
-            return "⚠️ 记忆体为空"
-        else:
-            self.cc.mess.clear()
-            return "✅ 清除成功"
+        return msg   

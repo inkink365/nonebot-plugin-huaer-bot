@@ -3,7 +3,7 @@ import toml
 import shutil
 import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Optional, Tuple, Dict, List, Any
 from nonebot import logger, get_driver, require
 
 require("nonebot_plugin_localstore")
@@ -102,7 +102,7 @@ BASE_DIR = get_data_dir("nonebot_plugin_huaer_bot")
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
-PATCH_VERSION = 11
+PATCH_VERSION = 12
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
@@ -254,3 +254,23 @@ class Information:
     def build_date(self) -> str:
         """获取构建日期"""
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+class Tools:
+    """工具类，包含一些常用函数"""
+    @staticmethod
+    def _parse_args(arg: List[str], *opts: str) -> Optional[Tuple]:
+        '''参数解析器（双参数且其一为可选）
+        用于将两个参数提取出来，不受制于实际传入时的位置。
+
+        arg: 整段文本
+        opts: 不定长，可选参数所有的选项，会作为第二个返回值返回
+        '''
+
+        if len(arg) != 2 or not opts:
+            return None
+            
+        # 智能识别参数位置
+        a1 = next((a for a in arg if a in opts), None)
+        a2 = next((g for g in arg if g != a1), None)
+        
+        return (a2, a1) if a2 and a1 else None

@@ -2,8 +2,8 @@
 # Copyright (c) 2025 HuaEr DevGroup. Licensed under MIT.
 import re
 from nonebot import get_driver
-from .config import Information
 from nonebot.params import CommandArg
+from .config import Information, Tools
 from nonebot.permission import SUPERUSER
 from nonebot.adapters import Message, Event
 from .group import GroupManagement, GroupManager
@@ -25,19 +25,19 @@ __plugin_meta__ = PluginMetadata(
 # 对话事件响应器
 txt = on_command("对话")
 markdown_cmd = on_command("MD")
-recall_cmd = on_command("撤回")
 model_setting_cmd = on_command("模型设置", permission=SUPERUSER)
 model_prompt_cmd = on_command("模型列表", permission=SUPERUSER)
 thinking_disable_cmd = on_command("禁用思考", permission=SUPERUSER)
 thinking_enable_cmd = on_command("显示思考", permission=SUPERUSER)
-
+recall_memory = on_command("撤回")
+add_memory = on_command("记忆添加", permission=SUPERUSER)
+clean_memory = on_command("记忆清除", permission=SUPERUSER)
 
 # 人格管理事件响应器
 set_persona = on_command("人格设置", permission=SUPERUSER)
 save_persona = on_command("人格储存", permission=SUPERUSER)
 list_persona = on_command("人格列表", permission=SUPERUSER)
 load_persona = on_command("人格读取", permission=SUPERUSER)
-clean_memory = on_command("记忆清除", permission=SUPERUSER)
 
 # 白名单管理事件响应器
 group_whitelist = on_command("群聊白名单", permission=SUPERUSER)
@@ -81,18 +81,19 @@ class initialize:
 
             # 绑定处理器
             txt.handle()(self.handle_chat)
-            recall_cmd.handle()(self.handle_recall)
             markdown_cmd.handle()(self.handle_markdown)
-            model_prompt_cmd.handle()(self.handle_model_prompt)
-            model_setting_cmd.handle()(self.handle_model_setting)
             thinking_enable_cmd.handle()(self.enable_thinking)
+            model_prompt_cmd.handle()(self.handle_model_prompt)
             thinking_disable_cmd.handle()(self.disable_thinking)
+            model_setting_cmd.handle()(self.handle_model_setting)
+            recall_memory.handle()(self.handle_recall_memory)
+            clean_memory.handle()(self.handle_clean_memory)
+            add_memory.handle()(self.handle_add_memory)
             
             save_persona.handle()(self.handle_save_persona)
             list_persona.handle()(self.handle_list_persona)
             load_persona.handle()(self.handle_load_persona)
             set_persona.handle()(self.handle_set_personality)
-            clean_memory.handle()(self.handle_clean_memory)
 
             user_whitelist.handle()(self.handle_user_whitelist)
             group_whitelist.handle()(self.handle_group_whitelist)
@@ -146,13 +147,6 @@ class initialize:
 
         response = await self._get_group(self._get_info(event)).chat_handler.handle_chat(event, args, self._is_superuser(event.get_user_id()))
         await txt.finish(response)
-    
-    async def handle_recall(self, event: GroupMessageEvent) -> str:
-        if not self._check_access(event):
-            return
-        
-        response = await self._get_group(self._get_info(event)).chat_handler.handle_recall(self._is_superuser(event.get_user_id()))
-        await recall_cmd.finish(response)
 
     async def handle_markdown(self, event: GroupMessageEvent):
         if not self._check_access(event):
@@ -189,6 +183,27 @@ class initialize:
         response = await self._get_group(self._get_info(event)).chat_handler.disable_thinking()
         await thinking_disable_cmd.finish(response)
 
+    async def handle_recall_memory(self, event: GroupMessageEvent) -> str:
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_recall_memory(self._is_superuser(event.get_user_id()))
+        await recall_memory.finish(response)
+
+    async def handle_clean_memory(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_clean_memory()
+        await clean_memory.finish(response)
+
+    async def handle_add_memory(self, event: Event, args: Message = CommandArg()):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_add_memory(args)
+        await add_memory.finish(response)
+
     # 人格管理命令
     async def handle_list_persona(self, event: Event):
         if not self._check_access(event):
@@ -196,13 +211,6 @@ class initialize:
         
         response = await self._get_group(self._get_info(event)).personality_manager.handle_list_persona()
         await list_persona.finish(response)
-
-    async def handle_clean_memory(self, event: Event):
-        if not self._check_access(event):
-            return
-        
-        response = await self._get_group(self._get_info(event)).personality_manager.handle_clean_memory()
-        await clean_memory.finish(response)
 
     async def handle_save_persona(self, event: Event, args: Message = CommandArg()):
         if not self._check_access(event):
@@ -238,7 +246,7 @@ class initialize:
             return
         
         response = await self.groupmanager.whitelist_manager.handle_group_whitelist(args)
-        info = self.groupmanager.whitelist_manager._parse_args(args)
+        info = Tools._parse_args(args.extract_plain_text().split(), "增加", "删除")
         if info is not None:
             if info[1] == "增加" :
                 await self.groupmanager.add_group(info[0])
@@ -328,7 +336,7 @@ async def init():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.1.11 (Stable)
+# 版本号 / Version: 2.1.12 (Stable)
 # 最新修改日期 / Last Modified: 2025年7月5日 / July 5, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------
