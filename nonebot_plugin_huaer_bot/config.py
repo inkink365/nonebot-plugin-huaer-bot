@@ -8,7 +8,7 @@ from nonebot import logger, get_driver, require
 
 require("nonebot_plugin_localstore")
 
-from nonebot_plugin_localstore import get_data_dir
+from nonebot_plugin_localstore import get_plugin_data_dir
 
 class ConfigManager:
     '''配置管理类'''
@@ -97,12 +97,12 @@ except:
     pass
 
 # 数据存储目录
-BASE_DIR = get_data_dir("nonebot_plugin_huaer_bot")
+BASE_DIR = get_plugin_data_dir()
 
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 1
-PATCH_VERSION = 12
+PATCH_VERSION = 13
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
@@ -175,7 +175,7 @@ class ChatConfig:
         self.max_recall : int = min(self.rd , basic_config.get("max_recall", 2))
         self.current_personality : str= basic_config.get("default_personality", "你是名叫华尔的猫娘。") 
 
-    def _path_generation(self, ID) -> Path:
+    def _path_generation(self, ID) -> Path:#函数形式生成，方便拓展
         """生成数据存储位置的名称"""
         if ID == 0 :
             return PUBLIC_DIR
@@ -192,6 +192,15 @@ class ChatConfig:
             return 'private_config'
         else:
             return 'group_config'
+        
+    def _name_generation(self, ID) -> str:
+        """生成群的名称(编号|private|public),用于文档类"""
+        if ID == 0 :
+            return 'public'
+        elif ID == 1 :
+            return 'private'
+        else:
+            return str(self.group)
 
     def save_group(self) -> str:
         """一键保存群组配置"""

@@ -25,11 +25,11 @@ __plugin_meta__ = PluginMetadata(
 # 对话事件响应器
 txt = on_command("对话")
 markdown_cmd = on_command("MD")
+recall_memory = on_command("撤回")
 model_setting_cmd = on_command("模型设置", permission=SUPERUSER)
 model_prompt_cmd = on_command("模型列表", permission=SUPERUSER)
 thinking_disable_cmd = on_command("禁用思考", permission=SUPERUSER)
 thinking_enable_cmd = on_command("显示思考", permission=SUPERUSER)
-recall_memory = on_command("撤回")
 add_memory = on_command("记忆添加", permission=SUPERUSER)
 clean_memory = on_command("记忆清除", permission=SUPERUSER)
 
@@ -148,7 +148,7 @@ class initialize:
         response = await self._get_group(self._get_info(event)).chat_handler.handle_chat(event, args, self._is_superuser(event.get_user_id()))
         await txt.finish(response)
 
-    async def handle_markdown(self, event: GroupMessageEvent):
+    async def handle_markdown(self, event: Event):
         if not self._check_access(event):
             return
         
@@ -183,7 +183,7 @@ class initialize:
         response = await self._get_group(self._get_info(event)).chat_handler.disable_thinking()
         await thinking_disable_cmd.finish(response)
 
-    async def handle_recall_memory(self, event: GroupMessageEvent) -> str:
+    async def handle_recall_memory(self, event: Event) -> str:
         if not self._check_access(event):
             return
         
@@ -336,7 +336,7 @@ async def init():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.1.12 (Stable)
+# 版本号 / Version: 2.1.13 (Stable)
 # 最新修改日期 / Last Modified: 2025年7月5日 / July 5, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------

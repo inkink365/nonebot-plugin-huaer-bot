@@ -54,6 +54,9 @@ class Documentation:
         
         这是一个基于nonebot+napcat+deepseek的聊天机器人。
 
+        当前组群：
+        {self.chat_config._name_generation(self.chat_config.group)}
+
         当前模型:
         {current_model}
 
