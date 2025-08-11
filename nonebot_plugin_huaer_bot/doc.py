@@ -12,34 +12,44 @@ class Documentation:
         return f"""
         ##################
         系统版本: {self.information.full_version}
-        1. 撤回
-        2. 模型列表
-        3. 禁用思考
-        4. 显示思考
-        5. 记忆清除
-        6. 对话 [对话内容]
-        7. MD(markdown显示)
-        8. 模型设置 [对应模型编号]
-        9. 记忆添加 [用户/助手] [记忆内容]
+        1. 思考
+        2. 对话 [对话内容]
+        3. MD(markdown显示)
 
+        4. 模型列表
+        5. 模型设置 [对应模型编号]
+
+        6. 撤回
+        7. 记忆清除
+        8. 记忆输出
+        9. *记忆添加 [用户/助手] [记忆内容]
+
+        10. RAGS
+        11. SSIN
+        12. ALLIN
+        13. 联网搜索
+        14. *RAG清空
+        15. *RAG保存
+        16. *RAG添加 [添加内容]
+        17. *RAG删除 [删除内容]
         
-        10. 人格列表
-        11. 人格设置 [人格描述]
-        12. 人格读取 [人格名称] [公共/私有]
-        13. 人格储存 [人格名称] [公共/私有]
+        18. 人格列表
+        19. 人格设置 [人格描述]
+        20. 人格读取 [人格名称] [公共/私有]
+        21. 人格储存 [人格名称] [公共/私有]
 
-        14. 群聊白名单 [群号] [增加/删除]
-        15. 用户白名单 [QQ号] [增加/删除]
+        22. 群聊白名单 [群号] [增加/删除]
+        23. 用户白名单 [QQ号] [增加/删除]
 
-        16. 保存配置
-        17. 加载配置
-        18. 重置配置
+        24. 保存配置
+        25. 加载配置
+        26. 重置配置
 
-        19. readme 
-        20. 功能列表
+        27. readme 
+        28. 功能列表
 
-        21. 退出群聊
-        22. 选择群聊 [群号|public|private]
+        29. 退出群聊
+        30. 选择群聊 [群号|public|private]
         ##################
         """.replace('    ', '') 
 
@@ -55,7 +65,7 @@ class Documentation:
         这是一个基于nonebot+napcat+deepseek的聊天机器人。
 
         当前组群：
-        {self.chat_config._name_generation(self.chat_config.group)}
+        {self.chat_config.name}
 
         当前模型:
         {current_model}
@@ -71,6 +81,12 @@ class Documentation:
 
         深度思考:
         {'已启用' if self.chat_config.tkc else '暂不显示'}
+
+        RAG功能:
+        {'已启用' if self.chat_config.rag else '暂未启用'}
+
+        联网搜索:
+        {'已启用' if self.chat_config.search else '暂未启用'}
 
         （如需修改请联系管理员）
         

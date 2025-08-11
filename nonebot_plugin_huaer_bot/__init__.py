@@ -1,6 +1,9 @@
 # coding: utf-8
 # Copyright (c) 2025 HuaEr DevGroup. Licensed under MIT.
 import re
+from pathlib import Path
+from asyncio import to_thread, gather
+
 from nonebot import get_driver
 from nonebot.params import CommandArg
 from .config import Information, Tools
@@ -14,8 +17,8 @@ from nonebot.plugin import PluginMetadata
 
 __plugin_meta__ = PluginMetadata(
     name="HuaEr聊天bot",
-    description="基于SiliconFlow API的Nonebot2聊天插件",
-    usage="管理员可通过一系列操作设定对话规则，用户通过“/对话”等命令以使用，支持markdown显示",
+    description="基于SiliconFlow API的Nonebot2的多组群聊天插件，支持人格设定、markdown显示、联网搜索、检索增强生成（RAG）等功能",
+    usage="多组群聊天插件，支持markdown显示、联网搜索、检索增强生成（RAG）等等功能",
     type="application",
     homepage="https://github.com/inkink365/nonebot-plugin-huaer-bot",
     supported_adapters={ "~onebot.v11" }
@@ -26,12 +29,20 @@ __plugin_meta__ = PluginMetadata(
 txt = on_command("对话")
 markdown_cmd = on_command("MD")
 recall_memory = on_command("撤回")
-model_setting_cmd = on_command("模型设置", permission=SUPERUSER)
+switch_rag_cmd = on_command("RAGS", permission=SUPERUSER)
+switch_ssin_cmd = on_command("SSIN", permission=SUPERUSER)
+switch_allin_cmd = on_command("ALLIN", permission=SUPERUSER)
+switch_thinking_cmd = on_command("思考", permission=SUPERUSER)
 model_prompt_cmd = on_command("模型列表", permission=SUPERUSER)
-thinking_disable_cmd = on_command("禁用思考", permission=SUPERUSER)
-thinking_enable_cmd = on_command("显示思考", permission=SUPERUSER)
+model_setting_cmd = on_command("模型设置", permission=SUPERUSER)
+switch_search_cmd = on_command("联网搜索", permission=SUPERUSER)
 add_memory = on_command("记忆添加", permission=SUPERUSER)
+print_memory = on_command("记忆输出", permission=SUPERUSER)
 clean_memory = on_command("记忆清除", permission=SUPERUSER)
+insert_rag = on_command("RAG添加", permission=SUPERUSER)
+delete_rag = on_command("RAG删除", permission=SUPERUSER)
+clear_rag = on_command("RAG清空", permission=SUPERUSER)
+save_rag = on_command("RAG保存", permission=SUPERUSER)
 
 # 人格管理事件响应器
 set_persona = on_command("人格设置", permission=SUPERUSER)
@@ -82,13 +93,21 @@ class initialize:
             # 绑定处理器
             txt.handle()(self.handle_chat)
             markdown_cmd.handle()(self.handle_markdown)
-            thinking_enable_cmd.handle()(self.enable_thinking)
+            switch_rag_cmd.handle()(self.handle_switch_rag)
+            switch_ssin_cmd.handle()(self.handle_switch_ssin)
+            switch_allin_cmd.handle()(self.handle_switch_allin)
             model_prompt_cmd.handle()(self.handle_model_prompt)
-            thinking_disable_cmd.handle()(self.disable_thinking)
+            switch_search_cmd.handle()(self.handle_switch_search)
+            switch_thinking_cmd.handle()(self.handle_switch_thinking)
             model_setting_cmd.handle()(self.handle_model_setting)
             recall_memory.handle()(self.handle_recall_memory)
+            print_memory.handle()(self.handle_print_memory)
             clean_memory.handle()(self.handle_clean_memory)
             add_memory.handle()(self.handle_add_memory)
+            insert_rag.handle()(self.handle_insert_rag)
+            delete_rag.handle()(self.handle_delete_rag)
+            clear_rag.handle()(self.handle_clear_rag)
+            save_rag.handle()(self.handle_save_rag)
             
             save_persona.handle()(self.handle_save_persona)
             list_persona.handle()(self.handle_list_persona)
@@ -159,49 +178,106 @@ class initialize:
         if not self._check_access(event):
             return
         
-        response = await self._get_group("public").chat_handler.handle_model_prompt()
+        response = self._get_group("public").chat_handler.handle_model_prompt()
         await model_prompt_cmd.finish(response)
     
     async def handle_model_setting(self, event: Event, key: Message = CommandArg()):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.handle_model_setting(key)
+        response = self._get_group(self._get_info(event)).chat_handler.handle_model_setting(key)
         await model_setting_cmd.finish(response)
 
-    async def enable_thinking(self, event: Event):
+    async def handle_switch_thinking(self, event: Event):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.enable_thinking()
-        await thinking_enable_cmd.finish(response)
+        response = self._get_group(self._get_info(event)).chat_handler.switch_thinking()
+        await switch_thinking_cmd.finish(response)
 
-    async def disable_thinking(self, event: Event):
+    async def handle_switch_rag(self, event: Event):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.disable_thinking()
-        await thinking_disable_cmd.finish(response)
+        response = self._get_group(self._get_info(event)).chat_handler.switch_rag()
+        await switch_rag_cmd.finish(response)
+
+    async def handle_switch_ssin(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = self._get_group(self._get_info(event)).chat_handler.switch_ssin()
+        await switch_rag_cmd.finish(response)
+
+    async def handle_switch_allin(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = self._get_group(self._get_info(event)).chat_handler.switch_allin()
+        await switch_rag_cmd.finish(response)
+
+
+    async def handle_switch_search(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = self._get_group(self._get_info(event)).chat_handler.switch_search()
+        await switch_search_cmd.finish(response)
 
     async def handle_recall_memory(self, event: Event) -> str:
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.handle_recall_memory(self._is_superuser(event.get_user_id()))
+        response = self._get_group(self._get_info(event)).chat_handler.handle_recall_memory(self._is_superuser(event.get_user_id()))
         await recall_memory.finish(response)
+
+    async def handle_print_memory(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = self._get_group(self._get_info(event)).chat_handler.handle_print_memory()
+        await print_memory.finish(response)
 
     async def handle_clean_memory(self, event: Event):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.handle_clean_memory()
+        response = self._get_group(self._get_info(event)).chat_handler.handle_clean_memory()
         await clean_memory.finish(response)
 
     async def handle_add_memory(self, event: Event, args: Message = CommandArg()):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).chat_handler.handle_add_memory(args)
+        response = self._get_group(self._get_info(event)).chat_handler.handle_add_memory(args)
+        await add_memory.finish(response)
+
+    async def handle_delete_rag(self, event: Event, args: Message = CommandArg()):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_delete_index(args)
+        await clean_memory.finish(response)
+
+    async def handle_insert_rag(self, event: Event, args: Message = CommandArg()):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_insert_index(args)
+        await add_memory.finish(response)
+
+    async def handle_clear_rag(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_clear_index()
+        await add_memory.finish(response)
+
+    async def handle_save_rag(self, event: Event):
+        if not self._check_access(event):
+            return
+        
+        response = await self._get_group(self._get_info(event)).chat_handler.handle_save_index()
         await add_memory.finish(response)
 
     # 人格管理命令
@@ -209,7 +285,7 @@ class initialize:
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).personality_manager.handle_list_persona()
+        response = self._get_group(self._get_info(event)).personality_manager.handle_list_persona()
         await list_persona.finish(response)
 
     async def handle_save_persona(self, event: Event, args: Message = CommandArg()):
@@ -223,7 +299,7 @@ class initialize:
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).personality_manager.handle_load_persona(args)
+        response = self._get_group(self._get_info(event)).personality_manager.handle_load_persona(args)
         await load_persona.finish(response)
 
     async def handle_set_personality(self, event: Event, args: Message = CommandArg()):
@@ -259,14 +335,14 @@ class initialize:
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).save_group()
+        response = self._get_group(self._get_info(event)).save_group()
         await save_cmd.finish(response)
 
     async def load_group(self, event: Event):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).load_group()
+        response = self._get_group(self._get_info(event)).load_group()
         await load_cmd.finish(response)
 
     async def reset_group(self, event: Event):
@@ -281,14 +357,14 @@ class initialize:
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).show_dev_doc()
+        response = self._get_group(self._get_info(event)).show_dev_doc()
         await dev_doc_cmd.finish(response)
 
     async def show_user_doc(self, event: Event):
         if not self._check_access(event):
             return
         
-        response = await self._get_group(self._get_info(event)).show_user_doc()
+        response = self._get_group(self._get_info(event)).show_user_doc()
         await user_doc_cmd.finish(response)
 
     # 管理员命令
@@ -321,23 +397,43 @@ class initialize:
 
 driver = get_driver()
 
+container = None
+
 @driver.on_startup
 async def init():
-    init = initialize()
+    global container 
+    container = initialize()
     version_info = (
         f"\n{'='*40}\n"
         f" HuaEr bot Initialized\n"
-        f" Version: {init.information.full_version}\n"
-        f" Build Date: {init.information.build_date}\n"
+        f" Version: {container.information.full_version}\n"
+        f" Build Date: {container.information.build_date}\n"
         f"{'='*40}\n"
     )
     logger.info(version_info)
 
+@driver.on_shutdown
+async def auto_save():
+    logger.info("检测到终止指令，自动保存中...")
+
+    tasks = []
+    for group in container.groupmanager.groups.values():
+        tasks.append(to_thread(group.save_group))
+        tasks.append(group.chat_handler.handle_save_index())
+
+    results = await gather(*tasks, return_exceptions=True)
+
+    for result in results:
+        if isinstance(result, Exception):
+            logger.error(f"保存任务失败: {result}")
+
+    logger.info("保存完毕！")
+
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.1.13 (Stable)
-# 最新修改日期 / Last Modified: 2025年7月5日 / July 5, 2025
+# 版本号 / Version: 2.2.0 (alpha 1)
+# 最新修改日期 / Last Modified: 2025年8月11日 / August 11, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------
 # 版权声明 / Copyright: © 2025 华尔开发组 
@@ -349,5 +445,5 @@ async def init():
 # ---------------------------------------------------
 # 联系方式 / Contact:
 #   - 电子邮件 / Email: HuaEr_DevGroup@outlook.com
-#   - Q群 / Forum: 暂无
+#   - Q群 / Forum: 1006249997
 # ===================================================

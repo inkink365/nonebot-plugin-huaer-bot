@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import Dict, List
 
 from nonebot import logger
@@ -134,6 +135,8 @@ class GroupManagement:
     def __init__(self, ID):
         self.chat_config = ChatConfig(ID)
         self.chat_config.file.mkdir(exist_ok=True)
+        Path(self.chat_config.rag_file).mkdir(exist_ok=True)
+        self.chat_config.personality_file.mkdir(exist_ok=True)
 
         self.chat_handler = ChatHandler(chat_config=self.chat_config)
         self.documentation = Documentation(chat_config=self.chat_config)
@@ -151,20 +154,21 @@ class GroupManagement:
                 self.personality_manager._save_personality("华尔", False)
             elif ID == 1 :
                 self.chat_config.rd = 0 # 私聊记忆锁，容量默认为0
-
-    async def save_group(self):
+                self.chat_config.rag = False
+                
+    def save_group(self):
         """保存配置"""
         return self.chat_config.save_group()
 
-    async def load_group(self):
+    def load_group(self):
         """加载配置"""
         return self.chat_config.load_group()
     
-    async def show_dev_doc(self):
+    def show_dev_doc(self):
         """开发者文档"""
         return self.documentation.show_dev_doc()
 
-    async def show_user_doc(self):
+    def show_user_doc(self):
         """用户文档"""
         return self.documentation.show_user_doc()
 
@@ -191,7 +195,7 @@ class GroupManager:
 
             for group in self.whitelist_manager.groups :
                 self.groups[group] = GroupManagement(int(group))
-                logger.info(f"群{group}实例已初始化")
+                if self.groups[group].chat_config.prt: logger.info(f"群{group}实例已初始化")
             
             logger.info(f"群组管理器初始化完成，共加载 {len(self.groups)} 个实例")
             self._initialized = True

@@ -1,4 +1,4 @@
-#主要配置集中于此，可自行修改；所有指令及用法参见__init__.py和doc.py
+#主要配置集中于此，可自行修改；所有指令及用法参见doc.py和__init__.py
 
 [paths] # 聊天数据存储位置
 base_dir = "." # 使用nonebot-plugin-localstore get_plugin_data_dir创建，如需查看具体位置和修改位置请参见github.com/nonebot/plugin-localstore。
@@ -15,6 +15,7 @@ user_whitelist_file = "data/whitelist/user_whitelist.json"
 
 [api] # 默认硅基流动API及deepseek的模型
 url = "https://api.siliconflow.cn/v1/chat/completions"
+embedding_url = "https://api.siliconflow.cn/v1/embeddings"
 #模型，可自行增改
 models = [
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
@@ -28,6 +29,8 @@ models = [
     "Pro/deepseek-ai/DeepSeek-R1"
 ]
 pre_mod = [7, 8] #特殊模型索引，特殊模型具有一个不因切换模型而归零的使用冷却时间，只用超级用户不受限制
+embedding_model = ["Qwen/Qwen3-Embedding-8B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"] #嵌入模型和辅助RAG的LLM名称，第一个为嵌入模型，第二个为LLM
+funccall_model = "Qwen/Qwen2.5-32B-Instruct" #专门为function calling提供的LLM，这里给出一个即可
 
 # 填入自己的API_KEY
 [api.headers] 
@@ -36,16 +39,26 @@ Content-Type = "application/json"
 
 #api高级功能参照硅基流动官网，并修改ChatHandler.py -> (class)ChatHandler -> (func)_call_api 实现
 
+[search_engine]
+sapi_key = "tvly-dev-********************************" #llm搜索引擎tavily api_key (如果需要使用搜索的话)
+
+#截止2025年8月，tavily不是免费的，但每月有1000次免费额度；如有其它渠道可修改ChatHandler.py -> (class)ChatHandler -> (func)_llm_tool_ddg_search使用
+
 # 对话事件基本配置
 [basic_config] 
 tkc = false #是否显示思考内容
 cooldown = 300.0 #特殊模型冷却时间，单位秒
-prt = true #是否在对话和撤回时打印记录到日志
 mod = 3 #初始模型，对应models列表索引代表的模型
+prt = true #是否在对话,增删等场景打印日志至命令行
 default_personality = "你是名叫华尔的猫娘。" #默认人格
 max_token = 1024 #max_token，亦代表通过QQ命令设置人格的最大描述长度
 max_recall = 2 #最多撤回发言量，含义与rd一致，最多不超过rd（需为偶数）
 rd = 6 #记忆体容量，表示用户和助手发言量之和，除二即为记忆轮数（需为偶数）
+search = false #是否启用联网搜索（会增加时间和资源消耗）
+rag = false #是否启用检索增强生成（RAG）（会增加时间和资源消耗）
+ssin = false #当rag和search都开启时生效，为true时将会将联网搜索到信息的存入rag_index，为false则不会
+allin = false #当rag开启时生效，为true时所有对话记录均会保存至rag_index，为false时由llm智能保存信息 （开启增加空间，资源消耗，关闭增加时间消耗）
+# 但事实上，rag有内置的提取相关的代码，因此无法分辨孰优孰劣，甚至可能allin会更优。
 memory = [] #初始记忆内容（默认空），可看做机器人语气模板和记忆拓展，格式如下：
 ##list[dict[str, str]]
 #{
