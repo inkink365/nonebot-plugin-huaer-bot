@@ -264,6 +264,7 @@ class initialize:
         if not self._check_access(event):
             return
         
+        await add_memory.send("开始插入，请稍等...")
         response = await self._get_group(self._get_info(event)).chat_handler.handle_insert_index(args)
         await add_memory.finish(response)
 
@@ -433,7 +434,7 @@ async def auto_save():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.2.0 (stable)
+# 版本号 / Version: 2.2.1 (stable)
 # 最新修改日期 / Last Modified: 2025年8月11日 / August 11, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------

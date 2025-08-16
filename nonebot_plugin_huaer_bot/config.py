@@ -104,7 +104,7 @@ BASE_DIR = get_plugin_data_dir()
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 2
-PATCH_VERSION = 0
+PATCH_VERSION = 1
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
