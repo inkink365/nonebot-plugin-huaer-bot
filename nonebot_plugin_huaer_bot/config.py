@@ -105,7 +105,7 @@ BASE_DIR = get_plugin_data_dir()
 MAJOR_VERSION = 2
 MINOR_VERSION = 2
 PATCH_VERSION = 0
-VERSION_SUFFIX = "alpha1"
+VERSION_SUFFIX = "stable"
 
 # 导入配置文件
 cfg = ConfigManager.load_toml(CONFIG_DIR)

@@ -145,6 +145,7 @@ class initialize:
             return self.groupmanager.private_group_id
 
     def _check_access(self, event: Event) -> bool:
+        "依据白名单鉴权"
         user_id = event.get_user_id()
         group_id = None
         if isinstance(event, GroupMessageEvent):
@@ -432,7 +433,7 @@ async def auto_save():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.2.0 (alpha 1)
+# 版本号 / Version: 2.2.0 (stable)
 # 最新修改日期 / Last Modified: 2025年8月11日 / August 11, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------
