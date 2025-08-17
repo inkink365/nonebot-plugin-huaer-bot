@@ -90,7 +90,7 @@ class WhitelistManager:
                 return "⚠️ 格式错误，正确格式：/群聊白名单 [群号] [增加/删除]"
 
             group_id, action = parsed
-            if not self._validate_group_id(group_id):######
+            if not self._validate_group_id(group_id):
                 return "⚠️ 群号无效"
             
             # 执行更新操作
@@ -114,7 +114,7 @@ class WhitelistManager:
                 return "⚠️ 格式错误，正确格式：/用户白名单 [QQ号] [增加/删除]"
 
             user_id, action = parsed
-            if not self._validate_group_id(user_id):
+            if not self._validate_user_id(user_id):
                 return "⚠️ QQ号无效"
             
             # 执行更新操作

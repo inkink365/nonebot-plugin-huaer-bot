@@ -14,6 +14,7 @@ group_whitelist_file = "data/whitelist/group_whitelist.json"
 user_whitelist_file = "data/whitelist/user_whitelist.json"
 
 [api] # 默认硅基流动API及deepseek的模型
+api_key = "Bearer sk-xxxxxx-YOUR-API-KEY-xxxxxxxx" # 填入自己的API_KEY
 url = "https://api.siliconflow.cn/v1/chat/completions"
 embedding_url = "https://api.siliconflow.cn/v1/embeddings"
 #模型，可自行增改
@@ -32,17 +33,14 @@ pre_mod = [7, 8] #特殊模型索引，特殊模型具有一个不因切换模�
 embedding_model = ["Qwen/Qwen3-Embedding-8B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"] #嵌入模型和辅助RAG的LLM名称，第一个为嵌入模型，第二个为LLM
 funccall_model = "Qwen/Qwen2.5-32B-Instruct" #专门为function calling提供的LLM，这里给出一个即可
 
-# 填入自己的API_KEY
-[api.headers] 
-Authorization = "Bearer sk-xxxxxx-YOUR-API-KEY-xxxxxxxx"
-Content-Type = "application/json"
-
 #api高级功能参照硅基流动官网，并修改ChatHandler.py -> (class)ChatHandler -> (func)_call_api 实现
 
 [search_engine]
 sapi_key = "tvly-dev-********************************" #llm搜索引擎tavily api_key (如果需要使用搜索的话)
+#surl = "https://qianfan.baidubce.com/v2/ai_search/chat/completions" # V2.2.1, 新增国内搜索源，如去掉注释则默认使用百度搜索，同样，api_key应修改为百度api_key
 
 #截止2025年8月，tavily不是免费的，但每月有1000次免费额度；如有其它渠道可修改ChatHandler.py -> (class)ChatHandler -> (func)_llm_tool_ddg_search使用
+#百度API具有每日100次免费额度
 
 # 对话事件基本配置
 [basic_config] 

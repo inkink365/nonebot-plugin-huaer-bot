@@ -12,7 +12,7 @@ from nonebot import logger
 from nonebot import require
 from nonebot.adapters import Message, Event
 from nonebot.adapters.onebot.v11 import MessageSegment
-from .config import ConfigManager, ChatConfig, Tools, FUNC, API_URL, SAPI_KEY, HEADERS, PRE_MOD, PUBLIC_DIR, MODELS, EMB_URL, HEADERS
+from .config import ConfigManager, ChatConfig, Tools, FUNC, API_URL, SAPI_KEY, API_KEY, PRE_MOD, PUBLIC_DIR, MODELS, EMB_URL, SAPI_URL
 
 require("nonebot_plugin_htmlrender")
 
@@ -142,20 +142,40 @@ class ChatHandler:
                 logger.error(f"搜索失败: 请先设置api_key")
                 return None
             
-            if not queries: # 可能是llm未生成，故不报错
+            if not queries: # 可能是llm刻意留空，故不报错
                 return None
                     
-            responses = await gather(self.tavily_client.search(queries, max_results=max_results), return_exceptions=True)
             results = []
-            for response in responses:
-                if isinstance(response, Exception):
-                    logger.error(f"搜索失败: {response}")
-                else:
-                    for rr in response["results"]:
+            if SAPI_URL:
+                for q in queries:
+                    payload = {
+                                "messages": [{"role": "user","content": q}],
+                                "resource_type_filter": [{"type": "web","top_k": max_results}],
+                            }
+                    headers = {'Authorization': SAPI_KEY}
+                    response = await self.http_client.post(
+                        SAPI_URL,
+                        json=payload,
+                        headers=headers,
+                        timeout=60,
+                    )
+                    response.raise_for_status()
+                    for rr in response.json()["references"]:  
                         results.append({
                             "title": rr["title"],
                             "content": rr["content"]
                         })
+            else:
+                responses = await gather(*(self.tavily_client.search(q, max_results=max_results) for q in queries), return_exceptions=True)
+                for response in responses:
+                    if isinstance(response, Exception):
+                        logger.error(f"搜索失败: {response}")
+                    else:
+                        for rr in response["results"]:
+                            results.append({
+                                "title": rr["title"],
+                                "content": rr["content"]
+                            })
             if results: logger.debug(f"搜索成功，内容:\n{results}")
             return results
         except Exception as e:
@@ -215,7 +235,10 @@ class ChatHandler:
             response = await self.http_client.post(
                 API_URL,
                 json=payload,
-                headers=HEADERS,
+                headers={
+                    "Authorization" : API_KEY,
+                    "Content-Type" : "application/json"
+                },
                 timeout=60,
             )
             # 检查HTTP状态码
@@ -300,7 +323,7 @@ class ChatHandler:
             self.cc.ssin = False
             return "✅ 已关闭搜索存储"
         else :
-            self.cc.tkc = True
+            self.cc.ssin = True
             return "✅ 已开启搜索存储"
         
     def switch_allin(self) -> str:
@@ -403,7 +426,7 @@ class ChatHandler:
                         if not ret: continue
 
                         if "ddg" in info["name"]:
-                            cont.append(ret["content"])
+                            cont = [value["content"] for value in ret]
                             prompt.append(f"(资料: {ret})\n")
                         if "rag" in info["name"]:
                             prompt.append(f"(记录: {ret})\n") 
@@ -532,7 +555,7 @@ class ChatHandler:
         if not self.cc.rag:
             return "⚠️ RAG功能未开启"
         try:
-            self.cc.rag_file = self.cc.personality_file / "RAG_file_base" # 需要清空时，切换至基文件
+            self.cc.rag_file = str(self.cc.personality_file / "RAG_file_base") # 需要清空时，切换至基文件
             self.cc._reset_rag()
             await self.cc.hipporag.clear()
             return "✅ 清除成功"

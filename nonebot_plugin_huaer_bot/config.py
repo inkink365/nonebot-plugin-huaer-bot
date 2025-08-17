@@ -139,7 +139,7 @@ api_config = cfg["api"]
 # 解析API配置
 API_URL = api_config.get("url", "")
 MODELS = api_config.get("models", [])
-HEADERS = api_config.get("headers", {})
+API_KEY = api_config.get("api_key", "")
 FUNC = api_config.get("funccall_model","")
 EMBED = api_config.get("embedding_model", [])
 EMB_URL = api_config.get("embedding_url", "")
@@ -150,6 +150,7 @@ se_config = cfg["search_engine"]
 
 # 解析搜索引擎配置
 SAPI_KEY = se_config.get("sapi_key", "")
+SAPI_URL = se_config.get("surl", "")
 
 # 加载文件路径配置
 paths_config = cfg["files"]
@@ -227,7 +228,7 @@ class ChatConfig:
     def _creat_rag(self, filename: str) -> HippoRAG:
         """新建一个rag实例"""
         return  HippoRAG(
-                        api_key=HEADERS["Authorization"],
+                        api_key=API_KEY,
                         llm_base_url=API_URL,
                         save_dir=filename, 
                         llm_model_name=EMBED[1],

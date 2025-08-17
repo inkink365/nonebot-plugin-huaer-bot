@@ -208,14 +208,14 @@ class initialize:
             return
         
         response = self._get_group(self._get_info(event)).chat_handler.switch_ssin()
-        await switch_rag_cmd.finish(response)
+        await switch_ssin_cmd.finish(response)
 
     async def handle_switch_allin(self, event: Event):
         if not self._check_access(event):
             return
         
         response = self._get_group(self._get_info(event)).chat_handler.switch_allin()
-        await switch_rag_cmd.finish(response)
+        await switch_allin_cmd.finish(response)
 
 
     async def handle_switch_search(self, event: Event):
@@ -258,29 +258,29 @@ class initialize:
             return
         
         response = await self._get_group(self._get_info(event)).chat_handler.handle_delete_index(args)
-        await clean_memory.finish(response)
+        await delete_rag.finish(response)
 
     async def handle_insert_rag(self, event: Event, args: Message = CommandArg()):
         if not self._check_access(event):
             return
         
-        await add_memory.send("开始插入，请稍等...")
+        await insert_rag.send("开始插入，请稍等...")
         response = await self._get_group(self._get_info(event)).chat_handler.handle_insert_index(args)
-        await add_memory.finish(response)
+        await insert_rag.finish(response)
 
     async def handle_clear_rag(self, event: Event):
         if not self._check_access(event):
             return
         
         response = await self._get_group(self._get_info(event)).chat_handler.handle_clear_index()
-        await add_memory.finish(response)
+        await clear_rag.finish(response)
 
     async def handle_save_rag(self, event: Event):
         if not self._check_access(event):
             return
         
         response = await self._get_group(self._get_info(event)).chat_handler.handle_save_index()
-        await add_memory.finish(response)
+        await save_rag.finish(response)
 
     # 人格管理命令
     async def handle_list_persona(self, event: Event):
