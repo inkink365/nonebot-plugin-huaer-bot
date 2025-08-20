@@ -1,9 +1,9 @@
 import json
 import toml
+import copy
 import shutil
 import datetime
 from pathlib import Path
-from dataclasses import dataclass
 from hipporag_lite import HippoRAG
 from typing import Optional, Tuple, Dict, List, Any
 from nonebot import logger, get_driver, require
@@ -30,8 +30,11 @@ class ConfigManager:
     @staticmethod
     def save_toml(data: Dict[str, Any], file_path: Path):
         try:
+            existing_data = ConfigManager.load_toml(file_path)
+            existing_data.update(data)
+            
             with open(file_path, "w", encoding="utf-8") as f:
-                toml.dump(data, f)
+                toml.dump(existing_data, f)
         except Exception as e:
             logger.error(f"保存 {file_path} 失败: {e}")
 
@@ -104,7 +107,7 @@ BASE_DIR = get_plugin_data_dir()
 # 版本信息
 MAJOR_VERSION = 2
 MINOR_VERSION = 2
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 VERSION_SUFFIX = "stable"
 
 # 导入配置文件
@@ -169,7 +172,6 @@ WHITELIST_MODE  = whitelist_config.get("whitelist_mode", 0)
 # 加载对话配置
 basic_config = cfg["basic_config"]
 
-@dataclass
 class ChatConfig:
     '''变量容器类，配置的动态载体'''
     def __init__(self, ID: int):
@@ -184,6 +186,7 @@ class ChatConfig:
         self.rag_file : str = str(self.file / "RAG_file_base") # 基文件，用于随意修改，而不影响需要存储的信息
         self.hipporag : HippoRAG = self._creat_rag(self.rag_file)
 
+        # 基础配置
         self.rd : int = basic_config.get("rd", 6)
         self.mod : int = basic_config.get("mod", 3)
         self.prt : bool= basic_config.get("prt", True)
@@ -299,6 +302,25 @@ class ChatConfig:
         except Exception as e:
             logger.exception(f"未知加载错误{e}")
             return "⚠️ 系统异常，请联系管理员"
+        
+    def _conf_info(self):
+        """打印此类变量信息（排除mess）"""
+        simple_fields = [
+            "rd", "prt", "mod", "tkc", "rag", "ssin", "allin","search", "cooldown","rag_file", 
+            "max_token","max_recall", "current_personality", "group", "name", "config_name"
+        ]
+        return {field: getattr(self, field) for field in simple_fields}
+    
+    def copy_config(self, new_config):
+        """为重置准备的深拷贝"""
+        simple_fields = [
+            "rd", "prt", "mod", "tkc", "rag", "ssin", "allin", "search", "mess",
+            "cooldown", "max_token","max_recall", "current_personality"
+        ]
+        for field in {field: getattr(self, field) for field in simple_fields}:
+            if hasattr(new_config, field):
+                # 使用深拷贝，如果是可变类型（如 dict 或 list），否则直接赋值
+                setattr(new_config, field, copy.deepcopy(getattr(self, field)))
 
 class Information:
     """信息类，维护一些项目信息"""

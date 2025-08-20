@@ -219,7 +219,11 @@ class GroupManager:
     async def reset_group(self, group_id: str) -> str:
         """重置群组配置"""
         try :
-            self.get_group(group_id).chat_config = self.get_group(self.public_group_id).chat_config
+            grpc = self.get_group(group_id).chat_config
+            grpc.rag_file = str(grpc.personality_file / "RAG_file_base") # 需要清空时，切换至基文件
+            grpc._reset_rag()
+            await grpc.hipporag.clear()
+            self.get_group(self.public_group_id).chat_config.copy_config(grpc)
             return "✅ 重置完成"
         except Exception as e:
             logger.exception("未知错误：")
