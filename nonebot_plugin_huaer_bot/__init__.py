@@ -434,7 +434,7 @@ async def auto_save():
 # ===================================================
 #                   项目落款 / Project Footer
 # ===================================================
-# 版本号 / Version: 2.2.2 (stable)
+# 版本号 / Version: 2.2.3 (stable)
 # 最新修改日期 / Last Modified: 2025年8月17日 / August 17, 2025
 # 开发团队 / Development Team: 华尔开发组 / Huaer Development Group
 # ---------------------------------------------------

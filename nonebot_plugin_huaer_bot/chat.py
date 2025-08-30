@@ -62,14 +62,17 @@ class ChatHandler:
         '''生成对话记录'''
         if not content : return None
 
-        chara = self.role_map[role]
-        if name : chara += f'[{name}]'
-        chara += ": " 
-        content = chara + content
+        if role == "user": # 针对ds对格式化聊天记录的不适配性，特此修改
+            chara = self.role_map[role]
+            if name : chara += f'[{name}]'
+            chara += ": " 
+            content = chara + content
 
-        t = f"时间[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}] " 
-        if show_time:
-            content = t+content
+            t = f"时间[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}] " 
+
+            if show_time:
+                content = t+content
+
         return {"role": role,"content": content}
     
     def _chat_info(self) -> str:
